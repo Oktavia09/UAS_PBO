@@ -50,7 +50,7 @@
     <widget class="QFrame" name="frame_5">
      <property name="geometry">
       <rect>
-       <x>80</x>
+       <x>81</x>
        <y>20</y>
        <width>631</width>
        <height>121</height>
@@ -133,10 +133,10 @@ border-radius:20px;</string>
     <widget class="QLabel" name="label">
      <property name="geometry">
       <rect>
-       <x>94</x>
-       <y>222</y>
-       <width>191</width>
-       <height>81</height>
+       <x>120</x>
+       <y>236</y>
+       <width>141</width>
+       <height>51</height>
       </rect>
      </property>
      <property name="font">
@@ -145,7 +145,7 @@ border-radius:20px;</string>
       </font>
      </property>
      <property name="text">
-      <string>Nama</string>
+      <string>Donatur</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -169,14 +169,14 @@ font-size:20px;</string>
       <set>Qt::AlignCenter</set>
      </property>
      <property name="placeholderText">
-      <string>masukkan nama</string>
+      <string>masukkan nama donatur</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_2">
      <property name="geometry">
       <rect>
-       <x>75</x>
-       <y>287</y>
+       <x>80</x>
+       <y>290</y>
        <width>221</width>
        <height>51</height>
       </rect>
@@ -187,7 +187,7 @@ font-size:20px;</string>
       </font>
      </property>
      <property name="text">
-      <string>email</string>
+      <string>Nominal</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -196,7 +196,7 @@ font-size:20px;</string>
     <widget class="QLineEdit" name="lineEdit_4">
      <property name="geometry">
       <rect>
-       <x>369</x>
+       <x>370</x>
        <y>298</y>
        <width>241</width>
        <height>40</height>
@@ -211,14 +211,14 @@ font-size:20px;</string>
       <set>Qt::AlignCenter</set>
      </property>
      <property name="placeholderText">
-      <string>masukkan email</string>
+      <string>masukkan nominal</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_6">
      <property name="geometry">
       <rect>
-       <x>95</x>
-       <y>343</y>
+       <x>100</x>
+       <y>350</y>
        <width>221</width>
        <height>41</height>
       </rect>
@@ -229,55 +229,16 @@ font-size:20px;</string>
       </font>
      </property>
      <property name="text">
-      <string>Kategori</string>
+      <string>Pembayaran</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
-    <widget class="QRadioButton" name="radioButton">
-     <property name="geometry">
-      <rect>
-       <x>370</x>
-       <y>359</y>
-       <width>131</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">backgroun-color::#DBD4B4;</string>
-     </property>
-     <property name="text">
-      <string>Individu</string>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="radioButton_2">
-     <property name="geometry">
-      <rect>
-       <x>475</x>
-       <y>350</y>
-       <width>151</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Organisasi</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="pushButton">
      <property name="geometry">
       <rect>
-       <x>70</x>
+       <x>286</x>
        <y>499</y>
        <width>241</width>
        <height>51</height>
@@ -285,33 +246,113 @@ font-size:20px;</string>
      </property>
      <property name="styleSheet">
       <string notr="true">background-color:#DBD4B4;
-border-radius:20px;
+border-radius:5px;
 font-size:20px;
 </string>
      </property>
      <property name="text">
-      <string>Tambah</string>
+      <string>simpan</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_2">
+    <widget class="QComboBox" name="comboBox">
      <property name="geometry">
       <rect>
-       <x>510</x>
-       <y>500</y>
+       <x>370</x>
+       <y>350</y>
        <width>241</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:#DBD4B4;
+border-radius:5px;
+font-size:20px;</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>BNI</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>BRI</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>BCA</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>BSI</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Mandiri</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Lainnya</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLabel" name="label_8">
+     <property name="geometry">
+      <rect>
+       <x>603</x>
+       <y>170</y>
+       <width>181</width>
        <height>51</height>
       </rect>
      </property>
      <property name="styleSheet">
       <string notr="true">background-color:#DBD4B4;
-border-radius:20px;
-font-size:20px;
-</string>
+border-radius:20px;</string>
      </property>
      <property name="text">
-      <string>Update</string>
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap>../../Downloads/people.svg</pixmap>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="margin">
+      <number>3</number>
      </property>
     </widget>
+    <widget class="QLabel" name="label_7">
+     <property name="geometry">
+      <rect>
+       <x>671</x>
+       <y>183</y>
+       <width>51</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:#DBD4B4;
+border-radius:5px;
+font-size:20px;</string>
+     </property>
+     <property name="text">
+      <string>nama</string>
+     </property>
+    </widget>
+    <zorder>label_8</zorder>
+    <zorder>frame_5</zorder>
+    <zorder>label</zorder>
+    <zorder>lineEdit_3</zorder>
+    <zorder>label_2</zorder>
+    <zorder>lineEdit_4</zorder>
+    <zorder>label_6</zorder>
+    <zorder>pushButton</zorder>
+    <zorder>comboBox</zorder>
+    <zorder>label_7</zorder>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

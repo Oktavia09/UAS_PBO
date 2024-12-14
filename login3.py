@@ -1,12 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import mysql.connector
 from mysql.connector import Error
-import bcrypt
 
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-import mysql.connector
-from mysql.connector import Error
 
 class Ui_MainWindow(object):
     def __init__(self):
@@ -177,6 +172,7 @@ class Ui_MainWindow(object):
         self.new_window.show()
 
 class UI_form_donatur(object):
+    
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(800, 700)
