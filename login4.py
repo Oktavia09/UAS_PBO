@@ -158,6 +158,7 @@ class UI_form_donatur(object):
         self.db_connection = db_connection
         self.login_window = login_window
         self.cursor = db_connection.cursor()
+        self.current_donor_data = None
     
     
 
@@ -288,64 +289,61 @@ class UI_form_donatur(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
     
     def load_data(self):
+        """
+        Load existing donor data from the database
+        """
         try:
-            # Ambil data dari QLineEdit atau variabel lain jika ada
-            nama = self.lineEdit_3.text().strip()  # Mengambil nama dari input, pastikan menggunakan .text()
-            email = self.lineEdit_4.text().strip()  # Mengambil email dari input, pastikan menggunakan .text()
+            # Get data from input fields
+            nama = self.lineEdit_3.text().strip()
+            email = self.lineEdit_4.text().strip()
 
-            # Debugging nilai nama dan email
-            print(f"Nama input: '{nama}'")
-            print(f"Email input: '{email}'")
-
-            # Pastikan nama dan email tidak kosong
+            # Validate input
             if not nama or not email:
                 QMessageBox.warning(None, "Peringatan", "Nama dan Email harus diisi untuk mencari data!")
-                return
+                return False
 
-            # Eksekusi query untuk mencari donatur berdasarkan nama dan email
+            # Execute query to find donor
             sql = "SELECT * FROM donatur WHERE LOWER(nama) = LOWER(%s) AND LOWER(email) = LOWER(%s)"
-            self.cursor.execute(sql, (nama, email))  # Passing nama dan email sebagai parameter
-            result = self.cursor.fetchone()  # Mendapatkan hasil query
+            self.cursor.execute(sql, (nama, email))
+            result = self.cursor.fetchone()
 
-            # Debugging hasil query
-            print(f"Query Result: {result}")
-
-            # Periksa apakah data ditemukan
+            # Check if data is found
             if result:
-                print("Data ditemukan!")  # Debugging apakah data ditemukan
-                QMessageBox.information(None, "Data Ditemukan", "Data tersedia di database!")
+                # Store the current donor data for update process
+                self.current_donor_data = {
+                    'id': result[0],  # Assuming first column is ID
+                    'nama': result[1],
+                    'email': result[2],
+                    'kategori': result[3]
+                }
 
-                # Asumsikan hasil memiliki format (id, nama, email, kategori, ...)
-                self.lineEdit_3.setText(result[1])  # Nama (asumsi index 1 adalah nama)
-                self.lineEdit_4.setText(result[2])  # Email (asumsi index 2 adalah email)
-                if result[3] == "Individu":  # Kategori (asumsi index 3 adalah kategori)
+                # Populate form with existing data
+                self.lineEdit_3.setText(result[1])  # Nama
+                self.lineEdit_4.setText(result[2])  # Email
+                
+                # Set radio button based on category
+                if result[3] == "Individu":
                     self.radioButton.setChecked(True)
                 elif result[3] == "Organisasi":
                     self.radioButton_2.setChecked(True)
                 
-                # Tampilkan form update
-                # self.pushButton_2.clicked.connect(self.on_pushButton_2_clicked)
-                
-                # Menampilkan form update setelah data ditemukan
+                QMessageBox.information(None, "Data Ditemukan", "Data berhasil dimuat!")
+                return True
             else:
-                print("Data tidak ditemukan!")  # Debugging jika data tidak ditemukan
                 QMessageBox.warning(None, "Peringatan", "Data tidak ditemukan di database!")
-                QtWidgets.QApplication.instance().quit()  # Menutup aplikasi jika terjadi error
-                  # Menutup aplikasi jika data tidak ditemukan
-  # Menutup aplikasi jika terjadi error
-                # QtWidgets.QApplication.instance().quit()  # Menutup aplikasi jika data tidak ditemukan
+                return False
 
         except mysql.connector.Error as e:
-            print(f"Terjadi kesalahan: {e}")  # Debugging jika terjadi kesalahan
-            QMessageBox.critical(None, "Gagal", f"Terjadi kesalahan pada database: {e}")
-            QtWidgets.QApplication.instance().quit()  # Menutup aplikasi jika terjadi error
-  # Menutup aplikasi jika terjadi error
+            QMessageBox.critical(None, "Kesalahan Database", f"Terjadi kesalahan: {e}")
+            return False
   
     def on_pushButton_2_clicked(self):
-        # Memanggil kedua fungsi secara berurutan
-        self.load_data()
-        self.show_window_update()  # Menampilkan form update
-        self.show_update_form()       # Memperbarui data
+        """
+        Handle the update process when Update1 button is clicked
+        """
+        if self.load_data():
+            # Show update window with existing data
+            self.show_window_update()       # Memperbarui data
   
     def update_data(self):
         nama_baru = self.lineEdit_3.text()
@@ -428,22 +426,25 @@ class UI_form_donatur(object):
 
 
     def show_window_update(self):
-    
-
+        """
+        Open the UI_Edit window for updating donor information
+        """
         self.new_window = QtWidgets.QMainWindow()
-        self.ui = UI_Edit(self.db_connection)  # Passing the correct parameters
+        self.ui = UI_Edit(self.db_connection, self.current_donor_data)
         self.ui.setupUi(self.new_window)
         self.new_window.show()
-        
     
 
 
 
 
 class UI_Edit(object):
-    def __init__(self, db_connection):
+    
+    
+    def __init__(self, db_connection , current_donor_data=None):
         self.db_connection = db_connection
         self.cursor = db_connection.cursor()
+        self.current_donor_data = current_donor_data
          # Email awal untuk identifikasi
 
     def setupUi(self, MainWindow):
@@ -515,6 +516,10 @@ class UI_Edit(object):
 
         # Load data to form fields
         
+        
+        if self.current_donor_data:
+            self.populate_form()
+        
         self.pushButton_update.clicked.connect(self.update_data)  # Panggil load_data saat tombol update ditekan
 
         # Connect update button
@@ -528,31 +533,103 @@ class UI_Edit(object):
     
   # Menutup aplikasi jika terjadi error
 
+    def populate_form(self):
+        """
+        Populate form fields with existing donor data
+        """
+        if self.current_donor_data:
+            self.lineEdit_nama.setText(self.current_donor_data['nama'])
+            self.lineEdit_email.setText(self.current_donor_data['email'])
+            
+            if self.current_donor_data['kategori'] == 'Individu':
+                self.radioButton_individu.setChecked(True)
+            else:
+                self.radioButton_organisasi.setChecked(True)
 
 
 
   # Menutup aplikasi jika terjadi error
   # Menutup aplikasi jika terjadi error
+    def load_old_data(self):
+        """
+        Method to load the existing data of the donor before update
+        """
+        try:
+            # Assuming we want to load data based on some identifier (in this case, a hardcoded name)
+            sql = "SELECT nama, email, kategori FROM donatur WHERE nama = %s"
+            self.cursor.execute(sql, ('khn',))  # Replace 'khn' with a dynamic way to identify the donor
+            result = self.cursor.fetchone()
+            
+            if result:
+                # Unpack the retrieved data
+                nama_lama, email_lama, kategori_lama = result
+                
+                # Populate the form with existing data
+                self.lineEdit_nama.setText(nama_lama)
+                self.lineEdit_email.setText(email_lama)
+                
+                # Set the correct radio button based on kategori
+                if kategori_lama == 'Individu':
+                    self.radioButton_individu.setChecked(True)
+                else:
+                    self.radioButton_organisasi.setChecked(True)
+                
+                return nama_lama, email_lama, kategori_lama
+            else:
+                QMessageBox.warning(None, "Peringatan", "Data tidak ditemukan!")
+                return None
+        
+        except mysql.connector.Error as e:
+            QMessageBox.critical(None, "Kesalahan", f"Gagal mengambil data: {e}")
+            return None
 
     def update_data(self):
-        nama_lama = 'khn'
-        email_lama = 'khn@gmail.com'
-        kategori_lama = 'Individu'
-        nama_baru = self.lineEdit_nama.text()
-        email_baru = self.lineEdit_email.text()
-        kategori_baru = "Individu" if self.radioButton_individu.isChecked() else "Organisasi" if self.radioButton_organisasi.isChecked() else None
+        """
+        Update donor data in the database
+        """
+        # Validate input
+        nama_baru = self.lineEdit_nama.text().strip()
+        email_baru = self.lineEdit_email.text().strip()
+        kategori_baru = "Individu" if self.radioButton_individu.isChecked() else "Organisasi"
 
-        if not nama_baru or not email_baru or not kategori_baru:
-            QMessageBox.warning(None, "Peringatan", "Semua kolom harus diisi untuk memperbarui data!")
+        # Validate inputs
+        if not nama_baru or not email_baru:
+            QMessageBox.warning(None, "Peringatan", "Semua kolom harus diisi!")
             return
+
+        # Ensure we have the original donor data
+        if not self.current_donor_data:
+            QMessageBox.warning(None, "Kesalahan", "Data donor asli tidak ditemukan!")
+            return
+
         try:
-            # Update hanya jika data ditemukan, berdasarkan nama dan email
-            sql = "UPDATE donatur SET nama = %s, email = %s, kategori = %s WHERE nama = %s AND email = %s AND kategori = %s"
-            self.cursor.execute(sql, (nama_baru, email_baru, kategori_baru, nama_lama, email_lama, kategori_lama))
+            # Prepare update query
+            sql = """
+            UPDATE donatur 
+            SET nama = %s, email = %s, kategori = %s 
+            WHERE id = %s
+            """
+            self.cursor.execute(sql, (
+                nama_baru, 
+                email_baru, 
+                kategori_baru, 
+                self.current_donor_data['id']
+            ))
+            
+            # Commit the transaction
             self.db_connection.commit()
-            QMessageBox.information(None, "Berhasil", "Data berhasil diperbarui!")
+            
+            # Check if update was successful
+            if self.cursor.rowcount > 0:
+                QMessageBox.information(None, "Berhasil", "Data berhasil diperbarui!")
+                # Optionally, close the update window or redirect
+            else:
+                QMessageBox.warning(None, "Peringatan", "Tidak ada data yang diperbarui!")
+        
         except mysql.connector.Error as e:
-            QMessageBox.critical(None, "Gagal", f"Terjadi kesalahan: {e}")
+            # Rollback in case of error
+            self.db_connection.rollback()
+            QMessageBox.critical(None, "Kesalahan", f"Gagal memperbarui data: {e}")
 
 
 
@@ -564,6 +641,16 @@ class UI_Edit(object):
         self.radioButton_organisasi.setEnabled(True)  # Mengaktifkan radio button organisasi
         self.pushButton_update.setEnabled(True)
 
+    def redirect_to_ui_form_donatur(self):
+        """
+        Fungsi untuk kembali ke form `ui_form_donatur`.
+        """
+          # Import form donatur jika diperlukan
+        self.window = QtWidgets.QMainWindow()
+        self.ui = UI_form_donatur(self.db_connection)  # Pastikan form menerima parameter yang sesuai
+        self.ui.setupUi(self.window)
+        self.window.show()
+        self.current_window.close()
             
     
             
@@ -722,9 +809,6 @@ class Ui_Transaksi(object):
     
         
     
-
-    
-
     
 
 if __name__ == "__main__":
