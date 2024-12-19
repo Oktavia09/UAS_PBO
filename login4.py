@@ -269,6 +269,18 @@ class UI_form_donatur(object):
 "font-size:20px;\n"
 "")
         self.pushButton_2.setObjectName("pushButton_2")
+        
+        
+        
+        # Add new Masuk button
+        self.pushButton_masuk = QtWidgets.QPushButton(self.frame)
+        self.pushButton_masuk.setGeometry(QtCore.QRect(370, 420, 241, 51))
+        self.pushButton_masuk.setStyleSheet("background-color:#DBD4B4;\n"
+        "border-radius:20px;\n"
+        "font-size:20px;\n"
+        "")
+        self.pushButton_masuk.setObjectName("pushButton_masuk")
+        
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 26))
@@ -279,7 +291,9 @@ class UI_form_donatur(object):
         MainWindow.setStatusBar(self.statusbar) 
         self.pushButton.clicked.connect(self.save_data)
         # self.pushButton_2.clicked.connect(self.show_window_update)
-        # self.pushButton_2.clicked.connect(self.load_data)   
+        # self.pushButton_2.clicked.connect(self.load_data)
+        
+        self.pushButton_masuk.clicked.connect(self.on_masuk_clicked)   
         self.pushButton_2.clicked.connect(self.on_pushButton_2_clicked)
              
 
@@ -344,6 +358,7 @@ class UI_form_donatur(object):
         if self.load_data():
             # Show update window with existing data
             self.show_window_update()       # Memperbarui data
+    
   
     def update_data(self):
         nama_baru = self.lineEdit_3.text()
@@ -384,6 +399,7 @@ class UI_form_donatur(object):
         self.radioButton_2.setText(_translate("MainWindow", "Organisasi"))
         self.pushButton.setText(_translate("MainWindow", "Tambah"))
         self.pushButton_2.setText(_translate("MainWindow", "Update1"))
+        self.pushButton_masuk.setText(_translate("MainWindow", "Masuk"))
 
         
     def save_data(self):
@@ -410,11 +426,78 @@ class UI_form_donatur(object):
                 self.db_connection.commit()
                 QMessageBox.information(None, "Berhasil", "Data berhasil disimpan!")
 
-            # Redirect ke UI_Transaksi setelah data berhasil disimpan atau ditemukan
-            self.redirect_to_transaksi()
-            
         except mysql.connector.Error as e:
             QMessageBox.critical(None, "Gagal", f"Terjadi kesalahan: {e}")
+
+    def on_masuk_clicked(self):
+        """
+        Validate donor credentials and open the UI_Transaksi window.
+        
+        This method:
+        1. Checks if nama (name) and email are provided
+        2. Queries the database to find matching donor
+        3. Opens UI_Transaksi window with donor data if found
+        4. Displays appropriate error messages if validation fails
+        """
+        # Get input values
+        nama = self.lineEdit_3.text().strip()
+        email = self.lineEdit_4.text().strip()
+        
+        # Validate input fields
+        if not nama or not email:
+            QMessageBox.warning(
+                None, 
+                "Peringatan", 
+                "Nama dan Email harus diisi!"
+            )
+            return
+        
+        try:
+            # Prepare SQL query with case-insensitive matching
+            sql = """
+            SELECT * FROM donatur 
+            WHERE LOWER(nama) = LOWER(%s) AND LOWER(email) = LOWER(%s)
+            """
+            
+            # Execute query
+            self.cursor.execute(sql, (nama, email))
+            result = self.cursor.fetchone()
+            
+            # Check if donor exists
+            if result:
+                # Store the current donor data 
+                # Adjust index based on your actual database schema
+                self.current_donor_data = {
+                    'id': result[0],          # Donor ID
+                    'nama': result[1],        # Donor Name
+                    'email': result[2],       # Donor Email
+                    'kategori': result[3]     # Donor Category
+                }
+                
+                # Open UI_Transaksi window
+                self.new_window = QtWidgets.QMainWindow()
+                self.ui = Ui_Transaksi(
+                    db_connection=self.db_connection
+                    
+                )
+                self.ui.setupUi(self.new_window)
+                self.new_window.show()
+            
+            else:
+                # No matching donor found
+                QMessageBox.warning(
+                    None, 
+                    "Peringatan", 
+                    "Data tidak ditemukan di database!"
+                )
+        
+        except mysql.connector.Error as e:
+            # Handle database connection or query errors
+            QMessageBox.critical(
+                None, 
+                "Kesalahan Database", 
+                f"Terjadi kesalahan: {e}"
+            )
 
     
     def redirect_to_transaksi(self):
@@ -532,6 +615,7 @@ class UI_Edit(object):
       # Menutup aplikasi jika terjadi error
     
   # Menutup aplikasi jika terjadi error
+    
 
     def populate_form(self):
         """
@@ -547,8 +631,6 @@ class UI_Edit(object):
                 self.radioButton_organisasi.setChecked(True)
 
 
-
-  # Menutup aplikasi jika terjadi error
   # Menutup aplikasi jika terjadi error
     def load_old_data(self):
         """
